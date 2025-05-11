@@ -14,7 +14,15 @@ if seccion == "Inicio":
     col1, col2, col3 = st.columns(3)
     col1.metric("Total de ventas", f"${df['total_venta'].sum():,}")
     col2.metric("Inventario disponible", f"{df['unidades_vendidas'].sum():,} tallos")
-    col3.metric("Clientes frecuentes", df['cliente'].nunique())
+    clientes_frecuentes = df['cliente'].nunique()
+    col3.metric("Clientes frecuentes", clientes_frecuentes)
+
+# Alerta inteligente
+    if clientes_frecuentes < 5:
+        st.warning("🔍 Considera estrategias de fidelización: promociones, seguimiento o encuestas.")
+    else:
+        st.success("✅ Buen nivel de fidelidad de clientes.")
+
     st.subheader("🔔 Alertas Detalladas")
 
     # Diseño en columnas
