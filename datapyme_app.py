@@ -9,7 +9,7 @@ seccion = st.sidebar.radio("Menú", ["Inicio", "Ventas", "Inventario", "Clientes
 
 # Título principal
 st.markdown("## 🌸 DataPYME Flores – Panel de Análisis Comercial")
-
+# INICIO
 if seccion == "Inicio":
     col1, col2, col3 = st.columns(3)
     col1.metric("Total de ventas", f"${df['total_venta'].sum():,}")
