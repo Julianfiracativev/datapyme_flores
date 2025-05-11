@@ -9,7 +9,7 @@ df = pd.read_excel("DataFlores_Organizado.xlsx")
 seccion = st.sidebar.radio("Menú", ["Inicio", "Ventas", "Inventario", "Clientes"])
 
 # PANEL PRINCIPAL
-st.markdown("## 🌸 DataPYME Flores – Panel de Análisis Comercial")
+st.markdown("## 🌸Flores – Panel de Análisis Comercial")
 
 # SECCIÓN: INICIO
 if seccion == "Inicio":
