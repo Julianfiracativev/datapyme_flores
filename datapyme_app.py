@@ -5,27 +5,31 @@ import plotly.express as px
 # Cargar el archivo Excel
 df = pd.read_excel("DataFlores_Organizado.xlsx")
 
+# Menú lateral
 seccion = st.sidebar.radio("Menú", ["Inicio", "Ventas", "Inventario", "Clientes"])
 
 # PANEL PRINCIPAL
 st.markdown("## 🌸 DataPYME Flores – Panel de Análisis Comercial")
 
+# SECCIÓN: INICIO
 if seccion == "Inicio":
+    # Métricas principales
     col1, col2, col3 = st.columns(3)
     col1.metric("Total de ventas", f"${df['total_venta'].sum():,}")
     col2.metric("Inventario disponible", f"{df['unidades_vendidas'].sum():,} tallos")
+    
     clientes_frecuentes = df['cliente'].nunique()
     col3.metric("Clientes frecuentes", clientes_frecuentes)
 
-# Alerta inteligente
+    # Alerta inteligente
     if clientes_frecuentes < 5:
         st.warning("🔍 Considera estrategias de fidelización: promociones, seguimiento o encuestas.")
     else:
         st.success("✅ Buen nivel de fidelidad de clientes.")
 
+    # ALERTAS DETALLADAS
     st.subheader("🔔 Alertas Detalladas")
 
-    # Diseño en columnas
     colA, colB = st.columns(2)
 
     # Gráfico 1 - Cajas sobrantes
@@ -45,7 +49,7 @@ if seccion == "Inicio":
         st.plotly_chart(fig2, use_container_width=True)
         st.caption("📉 *Clientes con baja rotación.*")
 
-    # Gráfico 3 - Ventas bajas por flor (abajo solo)
+    # Gráfico 3 - Ventas bajas por flor
     st.markdown("### 📉 Ventas bajas por flor")
     ventas_bajas = df.groupby("tipo_flor")["total_venta"].sum().reset_index().sort_values("total_venta").head(5)
     fig3 = px.bar(ventas_bajas, x="tipo_flor", y="total_venta", color="tipo_flor", title="Top 5 en menos ventas")
