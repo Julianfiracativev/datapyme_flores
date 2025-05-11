@@ -1,15 +1,15 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 
 # Cargar el archivo Excel
 df = pd.read_excel("DataFlores_Organizado.xlsx")
 
-# Sidebar
 seccion = st.sidebar.radio("Menú", ["Inicio", "Ventas", "Inventario", "Clientes"])
 
-# Título principal
+# PANEL PRINCIPAL
 st.markdown("## 🌸 DataPYME Flores – Panel de Análisis Comercial")
-# INICIO
+
 if seccion == "Inicio":
     col1, col2, col3 = st.columns(3)
     col1.metric("Total de ventas", f"${df['total_venta'].sum():,}")
@@ -18,22 +18,27 @@ if seccion == "Inicio":
 
     st.subheader("🔔 Alertas Detalladas")
 
-    # 1. ALERTA – Cajas sobrantes (simulamos cajas con muchas unidades)
+    # Gráfico 1: Cajas sobrantes
     st.markdown("### 📦 Cajas sobrantes")
-    sobrantes = df[df["cajas_vendidas"] > 10].groupby("tipo_flor")["cajas_vendidas"].sum().reset_index()
-    st.bar_chart(sobrantes.set_index("tipo_flor"))
+    cajas_sobrantes = df[df["cajas_vendidas"] > 10].groupby("tipo_flor")["cajas_vendidas"].sum().reset_index()
+    fig1 = px.bar(cajas_sobrantes, x="tipo_flor", y="cajas_vendidas", color="tipo_flor", title="Flores con exceso de cajas")
+    st.plotly_chart(fig1, use_container_width=True)
+    st.caption("🔍 *Estas flores tienen más de 10 cajas vendidas, lo cual podría indicar sobreinventario.*")
 
-    # 2. ALERTA – Clientes inactivos (clientes con pocas compras)
+    # Gráfico 2: Clientes inactivos
     st.markdown("### 💤 Clientes inactivos")
     inactivos = df.groupby("cliente")["total_venta"].sum().reset_index()
     inactivos = inactivos[inactivos["total_venta"] < inactivos["total_venta"].quantile(0.25)]
-    st.bar_chart(inactivos.set_index("cliente"))
+    fig2 = px.bar(inactivos, x="cliente", y="total_venta", title="Clientes con compras muy bajas")
+    st.plotly_chart(fig2, use_container_width=True)
+    st.caption("📉 *Clientes con menor nivel de compras. Puede ser momento de reactivarlos con promociones.*")
 
-    # 3. ALERTA – Ventas bajas (flores con menor ingreso)
+    # Gráfico 3: Ventas bajas por flor
     st.markdown("### 📉 Ventas bajas por flor")
-    ventas_bajas = df.groupby("tipo_flor")["total_venta"].sum().reset_index()
-    ventas_bajas = ventas_bajas.sort_values("total_venta").head(5)
-    st.bar_chart(ventas_bajas.set_index("tipo_flor"))
+    ventas_bajas = df.groupby("tipo_flor")["total_venta"].sum().reset_index().sort_values("total_venta").head(5)
+    fig3 = px.bar(ventas_bajas, x="tipo_flor", y="total_venta", color="tipo_flor", title="Top 5 flores con menos ventas")
+    st.plotly_chart(fig3, use_container_width=True)
+    st.caption("⚠️ *Estas flores tienen bajo rendimiento comercial. Evaluar si mantenerlas o mejorar su promoción.*")
 
     st.caption("🔗 Conectado a Excel - Simulado")
 
