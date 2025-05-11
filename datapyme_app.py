@@ -18,14 +18,22 @@ if seccion == "Inicio":
     col1.metric("Total de ventas", f"${df['total_venta'].sum():,}")
     col2.metric("Inventario disponible", f"{df['unidades_vendidas'].sum():,} tallos")
     
-    clientes_frecuentes = df['cliente'].nunique()
-    col3.metric("Clientes frecuentes", clientes_frecuentes)
+    # Identificar clientes frecuentes: ventas en el cuartil superior
+    ventas_por_cliente = df.groupby("cliente")["total_venta"].sum().reset_index()
+    umbral_frecuentes = ventas_por_cliente["total_venta"].quantile(0.75)
+    clientes_frecuentes_df = ventas_por_cliente[ventas_por_cliente["total_venta"] >= umbral_frecuentes]
+    
+    col3.metric("Clientes frecuentes", len(clientes_frecuentes_df))
 
     # Alerta inteligente
-    if clientes_frecuentes < 5:
+    if len(clientes_frecuentes_df) < 5:
         st.warning("🔍 Considera estrategias de fidelización: promociones, seguimiento o encuestas.")
     else:
         st.success("✅ Buen nivel de fidelidad de clientes.")
+
+    # Mostrar tabla de clientes frecuentes (opcional)
+    with st.expander("📋 Ver clientes frecuentes"):
+        st.dataframe(clientes_frecuentes_df)
 
     # ALERTAS DETALLADAS
     st.subheader("🔔 Alertas Detalladas")
@@ -43,8 +51,7 @@ if seccion == "Inicio":
     # Gráfico 2 - Clientes inactivos
     with colB:
         st.markdown("### 💤 Clientes inactivos")
-        inactivos = df.groupby("cliente")["total_venta"].sum().reset_index()
-        inactivos = inactivos[inactivos["total_venta"] < inactivos["total_venta"].quantile(0.25)]
+        inactivos = ventas_por_cliente[ventas_por_cliente["total_venta"] < ventas_por_cliente["total_venta"].quantile(0.25)]
         fig2 = px.bar(inactivos, x="cliente", y="total_venta", title="Clientes con baja compra")
         st.plotly_chart(fig2, use_container_width=True)
         st.caption("📉 *Clientes con baja rotación.*")
@@ -55,6 +62,7 @@ if seccion == "Inicio":
     fig3 = px.bar(ventas_bajas, x="tipo_flor", y="total_venta", color="tipo_flor", title="Top 5 en menos ventas")
     st.plotly_chart(fig3, use_container_width=True)
     st.caption("⚠️ *Flores con bajo rendimiento comercial.*")
+
 
 # SECCIÓN: VENTAS
 elif seccion == "Ventas":
