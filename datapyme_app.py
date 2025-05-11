@@ -10,24 +10,31 @@ seccion = st.sidebar.radio("Menú", ["Inicio", "Ventas", "Inventario", "Clientes
 # Título principal
 st.markdown("## 🌸 DataPYME Flores – Panel de Análisis Comercial")
 
-# SECCIÓN: INICIO
 if seccion == "Inicio":
     col1, col2, col3 = st.columns(3)
     col1.metric("Total de ventas", f"${df['total_venta'].sum():,}")
     col2.metric("Inventario disponible", f"{df['unidades_vendidas'].sum():,} tallos")
     col3.metric("Clientes frecuentes", df['cliente'].nunique())
 
-    st.subheader("🔔 Alertas")
-    alertas = pd.DataFrame({
-        "Tipo": ["Ventas bajas", "Cajas sobrantes", "Clientes inactivos"],
-        "Cantidad": [4, 6, 3]
-    })
-    st.bar_chart(alertas.set_index("Tipo"))
+    st.subheader("🔔 Alertas Detalladas")
 
-    st.subheader("✅ Ver sugerencias")
-    st.success("📌 Aplicar descuento a Rosa Premium")
-    st.warning("👮 Revisar cliente: FloralExpress")
-    st.error("🔹 Exceso de stock en Orquídea Blanca")
+    # 1. ALERTA – Cajas sobrantes (simulamos cajas con muchas unidades)
+    st.markdown("### 📦 Cajas sobrantes")
+    sobrantes = df[df["cajas_vendidas"] > 10].groupby("tipo_flor")["cajas_vendidas"].sum().reset_index()
+    st.bar_chart(sobrantes.set_index("tipo_flor"))
+
+    # 2. ALERTA – Clientes inactivos (clientes con pocas compras)
+    st.markdown("### 💤 Clientes inactivos")
+    inactivos = df.groupby("cliente")["total_venta"].sum().reset_index()
+    inactivos = inactivos[inactivos["total_venta"] < inactivos["total_venta"].quantile(0.25)]
+    st.bar_chart(inactivos.set_index("cliente"))
+
+    # 3. ALERTA – Ventas bajas (flores con menor ingreso)
+    st.markdown("### 📉 Ventas bajas por flor")
+    ventas_bajas = df.groupby("tipo_flor")["total_venta"].sum().reset_index()
+    ventas_bajas = ventas_bajas.sort_values("total_venta").head(5)
+    st.bar_chart(ventas_bajas.set_index("tipo_flor"))
+
     st.caption("🔗 Conectado a Excel - Simulado")
 
 # SECCIÓN: VENTAS
